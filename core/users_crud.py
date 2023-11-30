@@ -2,34 +2,55 @@ import sys
 sys.path.append("..")
 
 from db.models.user import User
-from db.db_setup import get_db
 from sqlalchemy.orm import Session;
 from db.models.schemas import UserData;
+from sqlalchemy.exc import SQLAlchemyError;
 
-# Assuming get_db returns an SQLAlchemy session
-db = get_db()
 
-def create_user(user: UserData):
-    db.add(user)
-    db.commit()
+
+def create_user(db:Session ,user: UserData):
+    try:
+        user_data = User(**user.dict());
+        db.add(user_data)
+        db.commit()
+        return True;
+    except SQLAlchemyError as e:  
+        print(e); 
+        return False;
+    
 
 def get_user(db:Session,user_id:int):
-    return db.query(User).filter(User.user_id == user_id).first();
-
-def update_user(db:Session , user_id : int , user:UserData):
     user = db.query(User).filter(User.user_id == user_id).first();
-    db.refresh(user);
-    db.commit();
-    return "Success";
+    if user:
+        return user;
+    else:
+        print("No user found");
+        return False;
+
+def update_user(db: Session, user_id: int, user: UserData):
+    user_data = db.query(User).filter(User.user_id == user_id).first()
+
+    if user_data:
+        for field, value in user.dict().items():
+            setattr(user_data, field, value)
+
+        db.commit()
+        db.refresh(user_data)
+        return True
+    else:
+        print("User not found")
+        return False
+
 
 def del_user(db:Session,user_id : int,confirmation:bool):
     user = db.query(User).filter(User.user_id == user_id).first();
-    if confirmation:
+    if user and confirmation:
         db.delete(user);
         db.commit();
         print("Sucessfully Deleted");
+        return True;
     else:
         print("Authentication Failed");
+        return False;
 
 
-del_user(db,2,True);

@@ -1,9 +1,8 @@
 from pydantic import BaseModel,EmailStr;
-from datetime import date;
+from datetime import datetime;
 
 
 class UserData(BaseModel):
-    user_id:int ;
     firstname:str;
     lastname:str;
     email : EmailStr;
@@ -14,13 +13,12 @@ class UserData(BaseModel):
 
 
 
-class Task(BaseModel):
-    task_id:int; 
+class TaskData(BaseModel):
     task_name:str; 
     task_description:str;
-    created_at:date;
-    ends_at:date;
-    is_completed:bool;
+    created_at:datetime | None = datetime.now();
+    ends_at:datetime | None = None;
+    is_completed:bool | None = False;
     user_id:int; 
 
     class Config:

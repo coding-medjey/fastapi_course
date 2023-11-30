@@ -1,41 +1,29 @@
+import sys
+sys.path.append("..")
+
 from fastapi import APIRouter,Path;
-from typing import List;
-from pydantic import BaseModel;
+from db.models.schemas import TaskData;
+from db.db_setup import get_db;
+from core.task_crud import create_task , get_tasks , update_tasks , del_task;
+
 
 router = APIRouter();
 
+db = get_db();
 
-tasks = [];
+@router.get("/tasks/{task_id}")
+async def get_task(task_id:int):
+    tasks = get_tasks(db,task_id)
+    return {"tasks" : tasks};
 
-class Task(BaseModel):
-    task_id:int = len(tasks) + 1;
-    task_description:str;
-    task_name:str;
-    is_completed:bool;
-    is_deleted:bool;
+@router.post("/create_task")
+async def create_tasks(task:TaskData):
+    return create_task(db,task);
 
+@router.put("/update_task/{id}")
+async def update_task(id:int,task:TaskData):
+    return update_tasks(db,id,task);
 
-@router.get("/task",response_model=List[Task])
-async def get_tasks():
-    return tasks;
-
-
-@router.post("/tasks")
-async def create_task(task:Task):
-    tasks.append(task);
-    return "Sucess";
-
-@router.get("/tasks/{id}")
-async def get_task_from_id(task_id:int = Path(...,description="ID of the user you want to retrieve their data" ,gt=0)):
-    return tasks[task_id - 1];
-
-
-@router.patch("/tasks/{id}")
-async def update_task(id:int, task:Task):
-    tasks[id-1] = task;
-    return "Sucess";
-
-@router.delete("/tasks/{id}")
-async def del_task(task_id:int):
-    del tasks[task_id - 1];
-    return "Sucessfully Deleted";
+@router.delete("/delete_task")
+async def delete_task(id:int,confirmation:bool):
+    return del_task(db,id,confirmation);
