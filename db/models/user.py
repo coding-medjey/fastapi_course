@@ -13,6 +13,6 @@ class User(Base):
     lastname = Column(String(255),nullable=False,index = True);
     email = Column(String(255),nullable=False,unique=True,index = True);
     password = Column(String(18),nullable = False,index=True);
-
+    tasks = relationship('Task', back_populates='user');
 
 

@@ -13,4 +13,5 @@ class Task(Base):
     created_at = Column(DateTime , nullable = False,index=True);
     ends_at = Column(DateTime,nullable=True,index=True);
     is_completed = Column(Boolean , nullable=False,index=True);
-    user_id = Column(Integer,nullable=False);
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False);
+    user = relationship('User', back_populates='tasks');
